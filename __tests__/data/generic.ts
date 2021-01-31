@@ -1,4 +1,5 @@
 export const wellFormed = [
+	// https://github.com/nickclaw/url-match-patterns/issues/2
 	{
 		pattern: 'https://*.ft.com/lol',
 		accept: [

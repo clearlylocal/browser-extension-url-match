@@ -15,3 +15,10 @@ export type MatcherPatternOptions = {
 	onInvalid?: 'throw' | 'null' | 'debug' | 'alwaysFalse'
 	strict?: boolean
 }
+
+export type PatternData = {
+	pattern: string
+	scheme: string
+	rawHost: string
+	rawPathAndQuery: string
+}

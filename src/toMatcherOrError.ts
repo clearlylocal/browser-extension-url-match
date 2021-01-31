@@ -1,73 +1,58 @@
 import { regex, regexEscape } from 'fancy-regex'
-import { Matcher, MatcherPatternOptions } from './types'
+import { getHostRegex } from './getHostRegex'
+import { MatcherPatternOptions, PatternData } from './types'
+import { createMatcher, normalizeUrlFragment } from './utils'
 
 const patternRegex = regex`
 	^
 		(\*|https?|wss?|ftps?|data|file)   # scheme
 		://
 		(
-			\* |           # Any host
-			\*\.[^/:]+ |   # The given host and any of its subdomains
+			\*          |  # Any host
+			\*\.[^/:]+  |  # The given host and any of its subdomains
 			[^/*:]*        # Only the given host (optional only if file scheme)
 		)
 		(/.*)              # path
 	$
 `
 
-const createMatcher = (fn: (url: URL) => boolean): Matcher => (
-	url: string | URL,
-) => {
-	let $url: URL
-
-	try {
-		$url = url instanceof URL ? url : new URL(url)
-	} catch (_e) {
-		return false
-	}
-
-	return fn($url)
-}
-
-export const toMatcherOrError = (options: Required<MatcherPatternOptions>) => (
+export const toMatcherOrError = (
 	pattern: string,
+	options: Required<MatcherPatternOptions>,
 ) => {
 	const { supportedSchemes, schemeStarMatchesWs, strict } = options
 
 	if (pattern === '<all_urls>') {
-		return createMatcher(url =>
-			regex`${supportedSchemes.join('|')}:`.test(url.protocol),
-		)
-	}
-
-	try {
-		const urlStr = pattern.split('*').join('a')
-		const url = new URL(urlStr)
-
-		if (/[^.a-z0-9-]/.test(url.host)) {
-			return new Error(`${pattern} host contains invalid characters`)
-		}
-	} catch (_e) {
-		return new Error(`${pattern} cannot be used to create a valid URL`)
+		return createMatcher(url => {
+			return regex`
+				^
+					(?:${supportedSchemes.map(regexEscape).join('|')})
+					:
+				$
+			`.test(url.protocol)
+		})
 	}
 
 	const m = pattern.match(patternRegex)
 
-	if (!m) return new Error(`${pattern} is invalid`)
+	if (!m) return new Error(`pattern ${pattern} is invalid`)
 
-	const [_, scheme, host, _pathAndQuery] = m
+	const [, /* fullMatch */ scheme, rawHost, rawPathAndQuery] = m
 
-	// The path must be present in a host permission, but is ignored
-	const pathAndQuery = strict ? _pathAndQuery : '/*'
+	const patternData: PatternData = {
+		pattern,
+		scheme,
+		rawHost,
+		rawPathAndQuery,
+	}
+
+	/* Scheme */
 
 	if (
 		scheme !== '*' &&
 		!supportedSchemes.includes(scheme as typeof supportedSchemes[number])
 	) {
 		return new Error(`scheme ${scheme} not supported`)
-	}
-
-	if (!host && scheme !== 'file') {
-		return new Error('host is optional only if the scheme is "file".')
 	}
 
 	const schemeRegex = regex`${
@@ -78,23 +63,20 @@ export const toMatcherOrError = (options: Required<MatcherPatternOptions>) => (
 			: scheme
 	}:`
 
-	let hostRegex: RegExp
+	/* Host */
 
-	if (host === '*') {
-		hostRegex = /.+/
-	} else if (host.includes('*')) {
-		const segments = host.split('*.')
+	const hostRegex = getHostRegex(patternData)
 
-		if (segments.length !== 2 || segments[0] || !segments[1]) {
-			return new Error(
-				'partial-wildcard host must be of form *.<host segments>',
-			)
-		}
-
-		hostRegex = regex`^(?:[^.]+\.)*${regexEscape(host.slice(2))}$`
-	} else {
-		hostRegex = regex`^${regexEscape(host)}$`
+	if (hostRegex instanceof Error) {
+		return hostRegex
 	}
+
+	/* Path and query string */
+
+	// Non-strict used for host permissions.
+	// "The path must be present in a host permission, but is always treated as /*."
+	// See https://developer.chrome.com/docs/extensions/mv3/match_patterns/
+	const pathAndQuery = strict ? normalizeUrlFragment(rawPathAndQuery) : '/*'
 
 	const pathAndQueryRegex =
 		pathAndQuery === '/'

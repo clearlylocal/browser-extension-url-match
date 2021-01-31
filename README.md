@@ -1,8 +1,10 @@
 # browser-extension-url-match
 
-Configurable URL pattern matching, as used by [Chrome](https://developer.chrome.com/docs/extensions/mv3/match_patterns/) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns) browser extensions.
+Robust, configurable URL pattern matching, as used by [Chrome](https://developer.chrome.com/docs/extensions/mv3/match_patterns/) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns) browser extensions.
 
 [`npm i browser-extension-url-match`](https://www.npmjs.com/package/browser-extension-url-match)
+
+This library uses the native [`URL`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor. A polyfill may be required if you need to support Internet Explorer or legacy versions of Node.JS.
 
 ## Usage
 
@@ -11,6 +13,8 @@ Configurable URL pattern matching, as used by [Chrome](https://developer.chrome.
 `matchPattern` defaults to Chrome presets with strict URL matching. It returns a function to match URLs against, or `null` if the supplied pattern was invalid.
 
 ```ts
+import { matchPattern } from 'browser-extension-url-match'
+
 const matchUrl = matchPattern('https://example.com/foo/*')
 
 matchUrl!('https://example.com/foo/bar')
@@ -19,13 +23,14 @@ matchUrl!('https://example.com/bar/baz')
 // ⇒ false
 ```
 
-### `matchPatternWithConfig`
+### Configuration options
 
 You can create a customized version of `matchPattern` using `matchPatternWithConfig`.
 
 ```ts
+import { matchPatternWithConfig } from 'browser-extension-url-match'
+
 const matchPattern = matchPatternWithConfig({
-    strict: true,
     onInvalid: 'throw',
     supportedSchemes: ['http', 'https', 'ws', 'wss'],
     schemeStarMatchesWs: true,
@@ -36,6 +41,8 @@ const matchUrl = matchPattern('*://example.com/*')
 matchUrl('wss://example.com/foo/bar')
 // ⇒ true
 ```
+
+The available options are as follows:
 
 #### `strict`
 
@@ -68,12 +75,12 @@ If `true`, `*` in the scheme will match `ws` and `wss` as well as `http` and `ht
 
 Default: `false`
 
-#### Chrome and Firefox presets
+### Chrome and Firefox presets
 
 Presets are available to provide defaults based on what Chrome and Firefox support.
 
 ```ts
-import { matchPatternWithConfig, presets } from '../src'
+import { matchPatternWithConfig, presets } from 'browser-extension-url-match'
 
 const matchPattern = matchPatternWithConfig(presets.firefox)
 

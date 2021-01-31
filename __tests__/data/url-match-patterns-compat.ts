@@ -27,31 +27,22 @@ export const wellFormed = [
 	// https://github.com/nickclaw/url-match-patterns/blob/master/test/regression.js
 
 	{ pattern: '*://*/fo?o', accept: [], reject: ['http://example.com/fo'] },
-
 	{ pattern: '*://*/f.o', accept: [], reject: ['http://example.com/foo'] },
-
 	{ pattern: '*://*/fo+', accept: [], reject: ['http://example.com/foo'] },
-
 	{
 		pattern: '*://*/fo{1,2}',
 		accept: [],
 		reject: ['http://example.com/foo'],
 	},
-
 	{ pattern: '*://*/fo^', accept: ['http://example.com/fo^'], reject: [] },
-
 	{ pattern: '*://*/fo$', accept: ['http://example.com/fo$'], reject: [] },
-
 	{ pattern: '*://*/fo(', accept: ['http://example.com/fo('], reject: [] },
-
 	{ pattern: '*://*/fo)', accept: ['http://example.com/fo)'], reject: [] },
-
 	{
 		pattern: '*://*/fo|a)',
 		accept: ['http://example.com/fo|a)'],
 		reject: [],
 	},
-
 	{
 		pattern: '*://*/[fo])',
 		accept: ['http://example.com/[fo])'],

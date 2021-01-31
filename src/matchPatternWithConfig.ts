@@ -20,7 +20,7 @@ export const matchPatternWithConfig = <TOptions extends MatcherPatternOptions>(
 		...options,
 	}
 
-	const val = toMatcherOrError(combinedOptions)(pattern)
+	const val = toMatcherOrError(pattern, combinedOptions)
 
 	const { onInvalid } = combinedOptions
 

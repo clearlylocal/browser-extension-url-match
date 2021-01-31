@@ -1,14 +1,16 @@
 import { matchPatternWithConfig, presets } from '../src'
 import * as chrome from './data/chrome'
 import * as firefox from './data/firefox'
-import * as other from './data/other'
+import * as generic from './data/generic'
 import * as urlMatchPatternsCompat from './data/url-match-patterns-compat'
+import * as normalization from './data/normalization'
 
 const all = {
 	chrome,
 	firefox,
-	other,
+	generic,
 	urlMatchPatternsCompat,
+	normalization,
 }
 
 Object.entries(all).forEach(([k, v]) => {
@@ -42,12 +44,13 @@ Object.entries(all).forEach(([k, v]) => {
 
 		describe('badly formed', () => {
 			v.badlyFormed.forEach(pattern => {
-				const getMatcher = matchPatternWithConfig({
+				const matchPattern = matchPatternWithConfig({
 					...preset,
+					onInvalid: 'throw',
 				})
 
 				it(pattern, () => {
-					expect(getMatcher(pattern)).toBe(null)
+					expect(() => matchPattern(pattern)).toThrow()
 				})
 			})
 		})
