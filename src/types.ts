@@ -1,6 +1,12 @@
-export type Matcher = (url: string | URL) => boolean
+export type MatchFn = (url: string | URL) => boolean
 
-export type MatcherPatternOptions = {
+export type Matcher = {
+	match: MatchFn
+	valid: boolean
+	error?: Error
+}
+
+export type MatchPatternOptions = {
 	supportedSchemes?: (
 		| 'http'
 		| 'https'
@@ -12,7 +18,6 @@ export type MatcherPatternOptions = {
 		| 'file'
 	)[]
 	schemeStarMatchesWs?: boolean
-	onInvalid?: 'throw' | 'null' | 'debug' | 'alwaysFalse'
 	strict?: boolean
 }
 

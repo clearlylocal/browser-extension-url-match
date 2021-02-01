@@ -19,23 +19,26 @@ Object.entries(all).forEach(([k, v]) => {
 
 		describe('well formed', () => {
 			v.wellFormed.forEach(({ pattern, accept, reject }) => {
-				const matchPattern = matchPatternWithConfig({
-					...preset,
-					onInvalid: 'throw',
-				})
+				const matchPattern = matchPatternWithConfig(preset)
 
 				describe(pattern, () => {
-					const matchUrl = matchPattern(pattern)
+					const matcher = matchPattern(pattern)
+
+					it('is valid', () => {
+						expect(matchPattern(pattern).valid).toBe(true)
+
+						expect(matchPattern(pattern).error).toBeUndefined()
+					})
 
 					accept.forEach(x => {
 						it(`matches ${x}`, () => {
-							expect(matchUrl(x)).toBe(true)
+							expect(matcher.match(x)).toBe(true)
 						})
 					})
 
 					reject.forEach(x => {
 						it(`doesn't match ${x}`, () => {
-							expect(matchUrl(x)).toBe(false)
+							expect(matcher.match(x)).toBe(false)
 						})
 					})
 				})
@@ -46,11 +49,11 @@ Object.entries(all).forEach(([k, v]) => {
 			v.badlyFormed.forEach(pattern => {
 				const matchPattern = matchPatternWithConfig({
 					...preset,
-					onInvalid: 'throw',
 				})
 
 				it(pattern, () => {
-					expect(() => matchPattern(pattern)).toThrow()
+					expect(matchPattern(pattern).valid).toBe(false)
+					expect(matchPattern(pattern).error).toBeInstanceOf(Error)
 				})
 			})
 		})

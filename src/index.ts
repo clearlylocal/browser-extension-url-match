@@ -1,3 +1,2 @@
-export { matchPattern } from './matchPattern'
-export { matchPatternWithConfig } from './matchPatternWithConfig'
+export { matchPattern, matchPatternWithConfig } from './matchPattern'
 export { presets } from './config'

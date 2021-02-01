@@ -1,9 +1,9 @@
-import { MatcherPatternOptions } from './types'
+import { MatchPatternOptions } from './types'
 
 export const presets: Record<
 	'chrome' | 'firefox',
 	Pick<
-		Required<MatcherPatternOptions>,
+		Required<MatchPatternOptions>,
 		'supportedSchemes' | 'schemeStarMatchesWs'
 	>
 > = {
@@ -26,8 +26,7 @@ export const presets: Record<
 	},
 }
 
-export const defaultOptions: Required<MatcherPatternOptions> = {
+export const defaultOptions: Required<MatchPatternOptions> = {
 	...presets.chrome,
-	onInvalid: 'null',
 	strict: true,
 }

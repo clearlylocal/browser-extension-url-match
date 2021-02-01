@@ -10,17 +10,54 @@ This library uses the native [`URL`](https://developer.mozilla.org/en-US/docs/We
 
 ### Basic usage with `matchPattern`
 
-`matchPattern` defaults to Chrome presets with strict URL matching. It returns a function to match URLs against, or `null` if the supplied pattern was invalid.
+`matchPattern` returns a `Matcher` object that can be used to match against URLs.
+
+```ts
+const matchPattern: (pattern: string) => Matcher
+
+type Matcher = {
+    match: (url: string | URL) => boolean
+    valid: boolean
+    error?: Error
+}
+```
+
+The default `matchPattern` function uses Chrome presets with strict URL matching.
 
 ```ts
 import { matchPattern } from 'browser-extension-url-match'
 
-const matchUrl = matchPattern('https://example.com/foo/*')
+const matcher = matchPattern('https://example.com/foo/*')
 
-matchUrl!('https://example.com/foo/bar')
+matcher.match('https://example.com/foo/bar')
 // ⇒ true
-matchUrl!('https://example.com/bar/baz')
+matcher.match('https://example.com/bar/baz')
 // ⇒ false
+```
+
+If the supplied pattern is invalid:
+* `matcher.valid` will be set to `false`.
+* `matcher.match` will always return `false`, regardless of the URL.
+* `matcher.error` will contain an error with debug info.
+
+```ts
+const invalidMatcher = matchPattern('INVALID')
+
+invalidMatcher.valid
+// ⇒ false
+invalidMatcher.error
+// ⇒ Error: pattern INVALID is invalid
+invalidMatcher.match('https://example.com/foo/bar')
+// ⇒ false
+
+const validMatcher = matchPattern('<all_urls>')
+
+validMatcher.valid
+// ⇒ true
+validMatcher.error
+// ⇒ undefined
+validMatcher.match('https://example.com/foo/bar')
+// ⇒ true
 ```
 
 ### Configuration options
@@ -31,49 +68,34 @@ You can create a customized version of `matchPattern` using `matchPatternWithCon
 import { matchPatternWithConfig } from 'browser-extension-url-match'
 
 const matchPattern = matchPatternWithConfig({
-    onInvalid: 'throw',
-    supportedSchemes: ['http', 'https', 'ws', 'wss'],
-    schemeStarMatchesWs: true,
+    supportedSchemes: ['http', 'https', 'ftp', 'ftps'],
 })
 
-const matchUrl = matchPattern('*://example.com/*')
-
-matchUrl('wss://example.com/foo/bar')
+matchPattern('ftps://*/*').match('ftps://example.com/foo/bar')
 // ⇒ true
 ```
 
-The available options are as follows:
+The available configuration options are as follows:
 
 #### `strict`
 
-If set to `false`, the path segment is always treated as `/*`, corresponding to the behavior when specifying [host permissions](https://developer.chrome.com/docs/extensions/mv3/declare_permissions/).
+If set to `false`, the specified path segment is ignored and is always treated as `/*`, corresponding to the behavior when specifying [host permissions](https://developer.chrome.com/docs/extensions/mv3/declare_permissions/).
 
-Default: `true`.
-
-#### `onInvalid`
-
-Changes the behavior of `matchPattern` if the supplied pattern is invalid.
-
-* `'null'` — Returns null
-* `'throw'` — Throws an error
-* `'debug'` — Returns an error but does not throw
-* `'alwaysFalse'` — Returns a function that does not match any URLs
-
-Default: `'null'`.
+**Default:** `true`.
 
 #### `supportedSchemes`
 
-An array of schemes to allow in the pattern. Available schemes are `'http'`, `'https'`, `'ws'`, `'wss'`, `'ftp'`, `'ftps'`, `'data'`, and `'file'`.
+An array of schemes to allow in the pattern. Available schemes are `http`, `https`, `ws`, `wss`, `ftp`, `ftps`, and `file`.
 
-Default: `['http', 'https', 'file', 'ftp']`
+`data` is not supported, due to very limited implementation and unclear semantics.
+
+**Default:** `['http', 'https', 'file', 'ftp']`
 
 #### `schemeStarMatchesWs`
 
-If `true`, `*` in the scheme will match `ws` and `wss` as well as `http` and `https`.
+If `true`, `*` in the scheme will match `ws` and `wss` as well as `http` and `https`, which is the default behavior in Firefox.
 
-`'http', 'https', 'ws', 'wss', 'ftp', 'ftps', 'data', 'file'`
-
-Default: `false`
+**Default:** `false`
 
 ### Chrome and Firefox presets
 
@@ -84,9 +106,9 @@ import { matchPatternWithConfig, presets } from 'browser-extension-url-match'
 
 const matchPattern = matchPatternWithConfig(presets.firefox)
 
-const matchUrl = matchPattern('*://example.com/')
+const matcher = matchPattern('*://example.com/')
 
-matchUrl!('ws://example.com')
+matcher.match('ws://example.com')
 // ⇒ true
 ```
 
@@ -95,13 +117,9 @@ You can also combine presets with custom options:
 ```ts
 const matchPattern = matchPatternWithConfig({
     ...presets.firefox,
-    onInvalid: 'alwaysFalse',
     strict: false,
 })
 
-matchPattern('https://example.com/')('https://example.com/foo/bar')
+matchPattern('wss://example.com/').match('wss://example.com/foo/bar')
 // ⇒ true
-
-matchPattern('INVALID')('https://example.com/foo/bar')
-// ⇒ false
 ```

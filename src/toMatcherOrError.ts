@@ -1,7 +1,7 @@
 import { regex, regexEscape } from 'fancy-regex'
 import { getHostRegex } from './getHostRegex'
-import { MatcherPatternOptions, PatternData } from './types'
-import { createMatcher, normalizeUrlFragment } from './utils'
+import { MatchPatternOptions, PatternData } from './types'
+import { createMatchFn, normalizeUrlFragment } from './utils'
 
 const patternRegex = regex`
 	^
@@ -18,12 +18,12 @@ const patternRegex = regex`
 
 export const toMatcherOrError = (
 	pattern: string,
-	options: Required<MatcherPatternOptions>,
+	options: Required<MatchPatternOptions>,
 ) => {
 	const { supportedSchemes, schemeStarMatchesWs, strict } = options
 
 	if (pattern === '<all_urls>') {
-		return createMatcher(url => {
+		return createMatchFn(url => {
 			return regex`
 				^
 					(?:${supportedSchemes.map(regexEscape).join('|')})
@@ -78,6 +78,10 @@ export const toMatcherOrError = (
 	// See https://developer.chrome.com/docs/extensions/mv3/match_patterns/
 	const pathAndQuery = strict ? normalizeUrlFragment(rawPathAndQuery) : '/*'
 
+	if (pathAndQuery instanceof Error) {
+		return pathAndQuery
+	}
+
 	const pathAndQueryRegex =
 		pathAndQuery === '/'
 			? /^\/$/
@@ -86,7 +90,7 @@ export const toMatcherOrError = (
 					.map(x => regexEscape(x))
 					.join('.*')}$`
 
-	return createMatcher(url => {
+	return createMatchFn(url => {
 		return (
 			schemeRegex.test(url.protocol) &&
 			hostRegex.test(url.host) &&
