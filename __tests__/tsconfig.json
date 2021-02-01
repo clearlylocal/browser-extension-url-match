@@ -12,8 +12,7 @@
 		"strictNullChecks": true,
 		"noImplicitThis": true,
 		"moduleResolution": "node",
-		"esModuleInterop": true,
-		"outDir": "./dist"
+		"esModuleInterop": true
 	},
-	"include": ["src/**/*.ts"]
+	"include": ["."]
 }

@@ -52,7 +52,7 @@ export const wellFormed = [
 	},
 ]
 
-export const badlyFormed = [
+export const malformed = [
 	'http://www.google.com',
 	'http://*foo/bar',
 	'http://foo.*.bar/baz',

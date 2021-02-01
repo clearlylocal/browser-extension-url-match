@@ -2,9 +2,16 @@ export type MatchFn = (url: string | URL) => boolean
 
 export type Matcher = {
 	match: MatchFn
-	valid: boolean
-	error?: Error
-}
+} & (
+	| {
+			valid: true
+			error?: undefined
+	  }
+	| {
+			valid: false
+			error: Error
+	  }
+)
 
 export type MatchPatternOptions = {
 	supportedSchemes?: (

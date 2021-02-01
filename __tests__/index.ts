@@ -5,7 +5,19 @@ import * as generic from './data/generic'
 import * as urlMatchPatternsCompat from './data/url-match-patterns-compat'
 import * as normalization from './data/normalization'
 
-const all = {
+type WellFormed = {
+	pattern: string
+	accept: string[]
+	reject: string[]
+}
+
+const all: Record<
+	string,
+	{
+		wellFormed: WellFormed[]
+		malformed: string[]
+	}
+> = {
 	chrome,
 	firefox,
 	generic,
@@ -15,12 +27,12 @@ const all = {
 
 Object.entries(all).forEach(([k, v]) => {
 	describe(k, () => {
-		const preset = presets[k as keyof typeof presets] || presets.chrome
+		const preset = presets[k as keyof typeof presets] ?? presets.chrome
 
-		describe('well formed', () => {
+		const matchPattern = matchPatternWithConfig(preset)
+
+		describe('well-formed', () => {
 			v.wellFormed.forEach(({ pattern, accept, reject }) => {
-				const matchPattern = matchPatternWithConfig(preset)
-
 				describe(pattern, () => {
 					const matcher = matchPattern(pattern)
 
@@ -45,15 +57,17 @@ Object.entries(all).forEach(([k, v]) => {
 			})
 		})
 
-		describe('badly formed', () => {
-			v.badlyFormed.forEach(pattern => {
-				const matchPattern = matchPatternWithConfig({
-					...preset,
-				})
+		describe('malformed', () => {
+			const allAccept = v.wellFormed.flatMap(({ accept }) => accept)
 
+			v.malformed.forEach(pattern => {
 				it(pattern, () => {
-					expect(matchPattern(pattern).valid).toBe(false)
-					expect(matchPattern(pattern).error).toBeInstanceOf(Error)
+					const m = matchPattern(pattern)
+
+					expect(m.valid).toBe(false)
+					expect(m.error).toBeInstanceOf(Error)
+
+					expect(allAccept.some(str => m.match(str))).toBe(false)
 				})
 			})
 		})

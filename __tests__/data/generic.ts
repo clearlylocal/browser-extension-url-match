@@ -14,7 +14,7 @@ export const wellFormed = [
 	},
 ]
 
-export const badlyFormed = [
+export const malformed = [
 	'',
 	'*:/www.ab.com/',
 	'htp://www.ab.com/',

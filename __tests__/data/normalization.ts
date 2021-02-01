@@ -70,4 +70,4 @@ export const wellFormed = [
 	},
 ]
 
-export const badlyFormed = []
+export const malformed = []

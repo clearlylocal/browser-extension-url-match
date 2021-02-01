@@ -136,7 +136,7 @@ export const wellFormed = [
 	},
 ]
 
-export const badlyFormed = [
+export const malformed = [
 	'resource://path/', // Unsupported scheme.
 	'https://mozilla.org', // No path.
 	'https://mozilla.*.org/', // "*" in host must be at the start.

@@ -206,7 +206,7 @@ export const wellFormed = [
 	},
 ]
 
-export const badlyFormed = [
+export const malformed = [
 	// https://github.com/nickclaw/url-match-patterns/blob/master/test/fixtures/firefox-examples.js
 
 	'resource://path/',
