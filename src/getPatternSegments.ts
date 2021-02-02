@@ -7,8 +7,7 @@ const patternRegex = regex`
 		://
 		(
 			\*          |  # Any host
-			\*\.[^/:]+  |  # The given host and any of its subdomains
-			[^/*:]*        # Only the given host (optional only if file scheme)
+			[^/]*         # Only the given host (optional only if file scheme)
 		)
 		(/.*)              # path
 	$

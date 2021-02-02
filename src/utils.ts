@@ -33,7 +33,12 @@ export const createMatchFn = (fn: (url: URL) => boolean): MatchFn => (
 		}
 
 		normalizedUrl.pathname = normalizedPathname
-		normalizedUrl.search = normalizedSearch
+
+		if (!normalizedUrl.href.endsWith('?')) {
+			// avoid nuking zero-search-string
+
+			normalizedUrl.search = normalizedSearch
+		}
 	} catch (_e) {
 		return false
 	}

@@ -38,7 +38,7 @@ export const wellFormed = [
 		reject: [],
 	},
 	{
-		pattern: 'https://exæmple.com/*',
+		pattern: 'https://exÆmple.com/*',
 		accept: ['https://xn--exmple-qua.com'],
 		reject: [],
 	},
@@ -49,12 +49,12 @@ export const wellFormed = [
 	},
 	{
 		pattern: 'https://xn--exmple-qua.com/*',
-		accept: ['https://exæmple.com', 'https://ex%C3%A6mple.com'],
+		accept: ['https://exÆmple.com', 'https://ex%C3%A6mple.com'],
 		reject: [],
 	},
 
 	{
-		pattern: 'https://*.exæmple.com/*',
+		pattern: 'https://*.exÆmple.com/*',
 		accept: ['https://foo.xn--exmple-qua.com'],
 		reject: [],
 	},
@@ -65,7 +65,7 @@ export const wellFormed = [
 	},
 	{
 		pattern: 'https://*.xn--exmple-qua.com/*',
-		accept: ['https://foo.exæmple.com', 'https://bar.baz.ex%C3%A6mple.com'],
+		accept: ['https://foo.exÆmple.com', 'https://bar.baz.ex%C3%A6mple.com'],
 		reject: [],
 	},
 ]

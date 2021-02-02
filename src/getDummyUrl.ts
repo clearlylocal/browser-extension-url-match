@@ -34,11 +34,20 @@ export const getDummyUrl = (
 		host = rawHost.replace(/^\*./, subdomain ? `${subdomain}.` : '')
 	}
 
+	const pathAndQuery = (strict ? rawPathAndQuery : '/*')
+		// start with hyphen-delimited
+		.replace(/\*/g, `-${pathAndQueryReplacer}-`)
+		// remove consecutive hyphens
+		.replace(/-+/g, '-')
+		// remove hyphens adjacent to slashes
+		.replace(/(^|\/)-/g, '$1')
+		.replace(/-(\/|$)/g, '$1')
+		// remove consecutive slashes
+		.replace(/\/+/g, '/')
+
 	try {
 		return new URL(
-			`${scheme}://${host}${(strict ? rawPathAndQuery : '/*')
-				.replace(/\*/g, pathAndQueryReplacer)
-				.replace(/\/+/g, '/')}`,
+			`${scheme}://${host}${pathAndQuery}`,
 		)
 	} catch (_e) {
 		return null

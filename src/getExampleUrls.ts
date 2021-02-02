@@ -1,4 +1,3 @@
-import { WWW } from './constants'
 import { getDummyUrl } from './getDummyUrl'
 import { getPatternSegments } from './getPatternSegments'
 import { MatchPatternOptions } from './types'
@@ -11,9 +10,9 @@ export const getExampleUrls = (
 	const patternSegments = getPatternSegments(pattern)!
 	const { supportedSchemes, strict } = options
 
-	const subdomains = ['', WWW, 'foo.bar']
+	const subdomains = ['', 'www', 'foo.bar']
 	const rootDomains = ['example.com']
-	const pathAndQueryReplacers = ['', '-foo-', '/bar/baz/']
+	const pathAndQueryReplacers = ['', 'foo', '/bar/baz/']
 
 	const all = supportedSchemes.flatMap(defaultScheme =>
 		subdomains.flatMap(subdomain =>

@@ -25,7 +25,7 @@ export const toMatchFnOrError = (
 	const patternSegments = getPatternSegments(pattern)
 
 	if (!patternSegments) {
-		return new Error(`pattern ${pattern} is invalid`)
+		return new Error(`Pattern ${pattern} is invalid`)
 	}
 
 	const { scheme, rawPathAndQuery } = patternSegments
@@ -36,7 +36,7 @@ export const toMatchFnOrError = (
 		scheme !== '*' &&
 		!supportedSchemes.includes(scheme as typeof supportedSchemes[number])
 	) {
-		return new Error(`scheme ${scheme} not supported`)
+		return new Error(`Scheme ${scheme} not supported`)
 	}
 
 	const schemeRegex = regex`${
@@ -66,19 +66,20 @@ export const toMatchFnOrError = (
 		return pathAndQuery
 	}
 
-	const pathAndQueryRegex =
-		pathAndQuery === '/'
-			? /^\/$/
-			: regex`^${pathAndQuery
-					.split('*')
-					.map(x => regexEscape(x))
-					.join('.*')}$`
+	const pathAndQueryRegex = regex`^${pathAndQuery
+		.split('*')
+		.map(x => regexEscape(x))
+		.join('.*')}$`
 
 	return createMatchFn(url => {
+		// respect zero-search-string
+		const pathAndQuery =
+			url.pathname + (url.href.endsWith('?') ? '?' : url.search)
+
 		return (
 			schemeRegex.test(url.protocol) &&
 			hostRegex.test(url.host) &&
-			pathAndQueryRegex.test(url.pathname + url.search)
+			pathAndQueryRegex.test(pathAndQuery)
 		)
 	})
 }

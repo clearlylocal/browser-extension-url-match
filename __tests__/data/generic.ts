@@ -12,6 +12,11 @@ export const wellFormed = [
 			'https://a.microsoft.com/lol',
 		],
 	},
+	{
+		pattern: '*://google.com/?',
+		accept: ['https://google.com/?'],
+		reject: ['https://google.com/a?', 'https://google.com/?a=1'],
+	},
 ]
 
 export const malformed = [

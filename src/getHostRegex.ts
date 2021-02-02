@@ -1,10 +1,13 @@
 import { regex, regexEscape } from 'fancy-regex'
-import { WWW } from './constants'
 import { getDummyUrl } from './getDummyUrl'
 import { PatternSegments } from './types'
 
 export const getHostRegex = (patternSegments: PatternSegments) => {
 	const { pattern, scheme, rawHost } = patternSegments
+
+	if (!rawHost && scheme !== 'file') {
+		return new Error('Host is optional only if the scheme is "file".')
+	}
 
 	const isStarHost = rawHost.includes('*')
 
@@ -16,32 +19,34 @@ export const getHostRegex = (patternSegments: PatternSegments) => {
 			(segments.length !== 2 || segments[0] || !segments[1])
 		) {
 			return new Error(
-				'partial-wildcard host must be of form *.<host segments>',
+				'Partial-wildcard host must be of form *.<host segments>',
 			)
 		}
 	}
 
 	const dummyUrl = getDummyUrl(patternSegments, {
-		subdomain: WWW,
+		subdomain: '',
 	})
 
 	if (!dummyUrl) {
 		return new Error(
-			`pattern ${pattern} cannot be used to construct a valid URL`,
+			`Pattern ${pattern} cannot be used to construct a valid URL.`,
 		)
 	}
 
 	const dummyHost = dummyUrl.host
 
+	if (/:\d+$/.test(dummyHost)) {
+		return new Error(
+			`Host ${rawHost} cannot include a port number. All ports are matched by default.`,
+		)
+	}
+
 	if (/[^.a-z0-9\-]/.test(dummyHost)) {
-		return new Error(`host ${rawHost} contains invalid characters`)
+		return new Error(`Host ${rawHost} contains invalid characters.`)
 	}
 
-	const host = isStarHost ? dummyHost.replace(regex`^${WWW}`, '*') : dummyHost
-
-	if (!host && scheme !== 'file') {
-		return new Error('host is optional only if the scheme is "file".')
-	}
+	const host = isStarHost ? '*.' + dummyHost : dummyHost
 
 	if (rawHost === '*') {
 		return /.+/
