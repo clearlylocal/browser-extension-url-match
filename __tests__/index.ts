@@ -11,7 +11,7 @@ type WellFormed = {
 	reject: string[]
 }
 
-const all: Record<
+const tests: Record<
 	string,
 	{
 		wellFormed: WellFormed[]
@@ -25,7 +25,7 @@ const all: Record<
 	normalization,
 }
 
-Object.entries(all).forEach(([k, v]) => {
+Object.entries(tests).forEach(([k, v]) => {
 	describe(k, () => {
 		const preset = presets[k as keyof typeof presets] ?? presets.chrome
 
@@ -37,9 +37,15 @@ Object.entries(all).forEach(([k, v]) => {
 					const matcher = matchPattern(pattern)
 
 					it('is valid', () => {
-						expect(matchPattern(pattern).valid).toBe(true)
+						expect(matcher.valid).toBe(true)
 
-						expect(matchPattern(pattern).error).toBeUndefined()
+						expect(matcher.error).toBeUndefined()
+					})
+
+					it('has at least 1 example', () => {
+						expect(matcher.examples.length).toBeGreaterThanOrEqual(
+							1,
+						)
 					})
 
 					accept.forEach(x => {
@@ -61,13 +67,26 @@ Object.entries(all).forEach(([k, v]) => {
 			const allAccept = v.wellFormed.flatMap(({ accept }) => accept)
 
 			v.malformed.forEach(pattern => {
-				it(pattern, () => {
-					const m = matchPattern(pattern)
+				describe(pattern, () => {
+					const matcher = matchPattern(pattern)
 
-					expect(m.valid).toBe(false)
-					expect(m.error).toBeInstanceOf(Error)
+					it('is invalid', () => {
+						expect(matcher.valid).toBe(false)
+					})
 
-					expect(allAccept.some(str => m.match(str))).toBe(false)
+					it('has error', () => {
+						expect(matcher.error).toBeInstanceOf(Error)
+					})
+
+					it('never matches', () => {
+						expect(allAccept.some(str => matcher.match(str))).toBe(
+							false,
+						)
+					})
+
+					it('has no examples', () => {
+						expect(matcher.examples.length).toBe(0)
+					})
 				})
 			})
 		})

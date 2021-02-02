@@ -1,5 +1,9 @@
 import { MatchFn } from './types'
 
+export const uniq = <T extends any>(arr: T[]) => {
+	return arr.filter((x, idx) => arr.indexOf(x) === idx)
+}
+
 export const normalizeUrlFragment = (urlFragent: string) => {
 	try {
 		return encodeURI(decodeURI(urlFragent))

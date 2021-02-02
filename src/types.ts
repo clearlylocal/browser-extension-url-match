@@ -1,7 +1,10 @@
 export type MatchFn = (url: string | URL) => boolean
 
 export type Matcher = {
+	examples: string[]
 	match: MatchFn
+	pattern: string
+	config: MatchPatternOptions
 } & (
 	| {
 			valid: true
@@ -28,7 +31,7 @@ export type MatchPatternOptions = {
 	strict?: boolean
 }
 
-export type PatternData = {
+export type PatternSegments = {
 	pattern: string
 	scheme: string
 	rawHost: string

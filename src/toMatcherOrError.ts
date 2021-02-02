@@ -1,28 +1,17 @@
 import { regex, regexEscape } from 'fancy-regex'
+import { ALL_URLS } from './constants'
 import { getHostRegex } from './getHostRegex'
-import { MatchPatternOptions, PatternData } from './types'
+import { getPatternSegments } from './getPatternSegments'
+import { MatchPatternOptions } from './types'
 import { createMatchFn, normalizeUrlFragment } from './utils'
 
-const patternRegex = regex`
-	^
-		(\*|https?|wss?|ftps?|data|file)   # scheme
-		://
-		(
-			\*          |  # Any host
-			\*\.[^/:]+  |  # The given host and any of its subdomains
-			[^/*:]*        # Only the given host (optional only if file scheme)
-		)
-		(/.*)              # path
-	$
-`
-
-export const toMatcherOrError = (
+export const toMatchFnOrError = (
 	pattern: string,
 	options: Required<MatchPatternOptions>,
 ) => {
 	const { supportedSchemes, schemeStarMatchesWs, strict } = options
 
-	if (pattern === '<all_urls>') {
+	if (pattern === ALL_URLS) {
 		return createMatchFn(url => {
 			return regex`
 				^
@@ -33,18 +22,13 @@ export const toMatcherOrError = (
 		})
 	}
 
-	const m = pattern.match(patternRegex)
+	const patternSegments = getPatternSegments(pattern)
 
-	if (!m) return new Error(`pattern ${pattern} is invalid`)
-
-	const [, /* fullMatch */ scheme, rawHost, rawPathAndQuery] = m
-
-	const patternData: PatternData = {
-		pattern,
-		scheme,
-		rawHost,
-		rawPathAndQuery,
+	if (!patternSegments) {
+		return new Error(`pattern ${pattern} is invalid`)
 	}
+
+	const { scheme, rawPathAndQuery } = patternSegments
 
 	/* Scheme */
 
@@ -65,7 +49,7 @@ export const toMatcherOrError = (
 
 	/* Host */
 
-	const hostRegex = getHostRegex(patternData)
+	const hostRegex = getHostRegex(patternSegments)
 
 	if (hostRegex instanceof Error) {
 		return hostRegex

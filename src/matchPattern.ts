@@ -1,24 +1,43 @@
 import { defaultOptions } from './config'
-import { toMatcherOrError } from './toMatcherOrError'
+import { getExampleUrls } from './getExampleUrls'
+import { toMatchFnOrError } from './toMatcherOrError'
 import { MatchPatternOptions, MatchFn, Matcher } from './types'
 
 export const matchPatternWithConfig = (options: MatchPatternOptions) => (
 	pattern: string,
 ): Matcher => {
-	const val = toMatcherOrError(pattern, {
+	const combinedOptions = {
 		...defaultOptions,
 		...options,
-	})
+	}
+
+	const val = toMatchFnOrError(pattern, combinedOptions)
 
 	return val instanceof Error
 		? {
-				match: (() => false) as MatchFn,
 				valid: false,
 				error: val,
+				match: (() => false) as MatchFn,
+				get examples() {
+					return []
+				},
+				pattern,
+				config: combinedOptions,
 		  }
 		: {
-				match: val,
 				valid: true,
+				match: val,
+				get examples() {
+					return (
+						getExampleUrls(pattern, combinedOptions)
+							// sanity check - examples should all match
+							.filter(url => (val as MatchFn)(url))
+							// prevent example list from getting too long
+							.slice(0, 100)
+					)
+				},
+				pattern,
+				config: combinedOptions,
 		  }
 }
 
