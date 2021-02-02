@@ -1,6 +1,6 @@
 {
 	"name": "browser-extension-url-match",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "Browser extension URL pattern matching",
 	"main": "dist/index.js",
 	"scripts": {
@@ -31,5 +31,15 @@
 	],
 	"dependencies": {
 		"fancy-regex": "^0.4.3"
-	}
+	},
+	"keywords": [
+		"URL",
+		"URI",
+		"pattern",
+		"match",
+		"Chrome",
+		"Firefox",
+		"extension",
+		"WebExtensions"
+	]
 }

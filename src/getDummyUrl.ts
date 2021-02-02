@@ -39,16 +39,13 @@ export const getDummyUrl = (
 		.replace(/\*/g, `-${pathAndQueryReplacer}-`)
 		// remove consecutive hyphens
 		.replace(/-+/g, '-')
-		// remove hyphens adjacent to slashes
-		.replace(/(^|\/)-/g, '$1')
-		.replace(/-(\/|$)/g, '$1')
+		// remove hyphens adjacent to delimiters
+		.replace(/-?(^|$|[/?=&])-?/g, '$1')
 		// remove consecutive slashes
 		.replace(/\/+/g, '/')
 
 	try {
-		return new URL(
-			`${scheme}://${host}${pathAndQuery}`,
-		)
+		return new URL(`${scheme}://${host}${pathAndQuery}`)
 	} catch (_e) {
 		return null
 	}
