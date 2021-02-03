@@ -1,3 +1,4 @@
+import { regex } from 'fancy-regex'
 import { PatternSegments } from './types'
 
 type DummyUrlOptions = Partial<{
@@ -7,6 +8,8 @@ type DummyUrlOptions = Partial<{
 	pathAndQueryReplacer: string
 	rootDomain: string
 }>
+
+const DELIMS = /^|$|[/?=&\-]/
 
 export const getDummyUrl = (
 	patternSegments: PatternSegments,
@@ -37,10 +40,9 @@ export const getDummyUrl = (
 	const pathAndQuery = (strict ? rawPathAndQuery : '/*')
 		// start with hyphen-delimited
 		.replace(/\*/g, `-${pathAndQueryReplacer}-`)
-		// remove consecutive hyphens
-		.replace(/-+/g, '-')
-		// remove hyphens adjacent to delimiters
-		.replace(/-?(^|$|[/?=&])-?/g, '$1')
+		// remove consecutive hyphens and hyphens adjacent to delimiters
+		.replace(regex('g')`-+(${DELIMS})`, '$1')
+		.replace(regex('g')`(${DELIMS})-+`, '$1')
 		// remove consecutive slashes
 		.replace(/\/+/g, '/')
 

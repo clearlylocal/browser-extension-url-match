@@ -3,13 +3,13 @@ import { PatternSegments } from './types'
 
 const patternRegex = regex`
 	^
-		(\*|https?|wss?|ftps?|data|file)   # scheme
+		(\*|\w+)      # scheme
 		://
 		(
-			\*          |  # Any host
-			[^/]*         # Only the given host (optional only if file scheme)
+			\*     |  # Any host
+			[^/]*     # Only the given host (optional only if scheme is file)
 		)
-		(/.*)              # path
+		(/.*)         # path
 	$
 `
 

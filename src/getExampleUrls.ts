@@ -1,7 +1,6 @@
 import { getDummyUrl } from './getDummyUrl'
 import { getPatternSegments } from './getPatternSegments'
 import { MatchPatternOptions } from './types'
-import { uniq } from './utils'
 
 export const getExampleUrls = (
 	pattern: string,
@@ -30,5 +29,5 @@ export const getExampleUrls = (
 		),
 	)
 
-	return uniq(all.filter(Boolean).map(url => url!.href))
+	return [...new Set(all.filter(Boolean).map(url => url!.href))]
 }

@@ -19,7 +19,7 @@ export const getHostRegex = (patternSegments: PatternSegments) => {
 			(segments.length !== 2 || segments[0] || !segments[1])
 		) {
 			return new Error(
-				'Partial-wildcard host must be of form *.<host segments>',
+				'Host can contain only one wildcard at the start, in the form "*.<host segments>"',
 			)
 		}
 	}
@@ -30,7 +30,7 @@ export const getHostRegex = (patternSegments: PatternSegments) => {
 
 	if (!dummyUrl) {
 		return new Error(
-			`Pattern ${pattern} cannot be used to construct a valid URL.`,
+			`Pattern "${pattern}" cannot be used to construct a valid URL.`,
 		)
 	}
 
@@ -38,12 +38,12 @@ export const getHostRegex = (patternSegments: PatternSegments) => {
 
 	if (/:\d+$/.test(dummyHost)) {
 		return new Error(
-			`Host ${rawHost} cannot include a port number. All ports are matched by default.`,
+			`Host "${rawHost}" cannot include a port number. All ports are matched by default.`,
 		)
 	}
 
 	if (/[^.a-z0-9\-]/.test(dummyHost)) {
-		return new Error(`Host ${rawHost} contains invalid characters.`)
+		return new Error(`Host "${rawHost}" contains invalid characters.`)
 	}
 
 	const host = isStarHost ? '*.' + dummyHost : dummyHost

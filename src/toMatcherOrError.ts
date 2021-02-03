@@ -25,7 +25,7 @@ export const toMatchFnOrError = (
 	const patternSegments = getPatternSegments(pattern)
 
 	if (!patternSegments) {
-		return new Error(`Pattern ${pattern} is invalid`)
+		return new Error(`Pattern "${pattern}" is invalid`)
 	}
 
 	const { scheme, rawPathAndQuery } = patternSegments
@@ -36,7 +36,7 @@ export const toMatchFnOrError = (
 		scheme !== '*' &&
 		!supportedSchemes.includes(scheme as typeof supportedSchemes[number])
 	) {
-		return new Error(`Scheme ${scheme} not supported`)
+		return new Error(`Scheme "${scheme}" is not supported`)
 	}
 
 	const schemeRegex = regex`${

@@ -41,16 +41,16 @@ matcher.match('https://example.com/bar/baz')
 If the supplied pattern is invalid:
 * `matcher.valid` will be set to `false`.
 * `matcher.match` will always return `false`, regardless of the URL.
-* `matcher.error` will contain an error with debug info.
+* `matcher.error` will contain an error with diagnostic information.
 
 ```ts
-const invalidMatcher = matchPattern('INVALID')
+const invalidMatcher = matchPattern('htp://example.com/*')
 
 invalidMatcher.valid
 // ⇒ false
 invalidMatcher.error
-// ⇒ Error: pattern INVALID is invalid
-invalidMatcher.match('https://example.com/foo/bar')
+// ⇒ Error: Scheme "htp" is not supported
+invalidMatcher.match('htp://example.com/')
 // ⇒ false
 
 const validMatcher = matchPattern('<all_urls>')
@@ -135,13 +135,13 @@ You can generate an array of example matching URL strings from any `Matcher` obj
 matchPattern('https://*.example.com/*').examples
 // ⇒ [
 //     'https://example.com/',
-//     'https://example.com/-foo-',
+//     'https://example.com/foo',
 //     'https://example.com/bar/baz/',
 //     'https://www.example.com/',
-//     'https://www.example.com/-foo-',
+//     'https://www.example.com/foo',
 //     'https://www.example.com/bar/baz/',
 //     'https://foo.bar.example.com/',
-//     'https://foo.bar.example.com/-foo-',
+//     'https://foo.bar.example.com/foo',
 //     'https://foo.bar.example.com/bar/baz/',
 // ]
 
