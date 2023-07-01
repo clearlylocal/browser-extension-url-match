@@ -2,5 +2,5 @@ module.exports = {
 	transform: {
 		'^.+\\.ts?$': 'ts-jest',
 	},
-	modulePathIgnorePatterns: ['data'],
+	modulePathIgnorePatterns: ['data', 'utils'],
 }

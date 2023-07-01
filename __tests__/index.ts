@@ -1,9 +1,10 @@
-import { matchPatternWithConfig, presets } from '../src'
+import { matchPattern, presets } from '../src'
 import * as chrome from './data/chrome'
 import * as firefox from './data/firefox'
 import * as generic from './data/generic'
 import * as urlMatchPatternsCompat from './data/url-match-patterns-compat'
 import * as normalization from './data/normalization'
+import { assertInvalid } from './utils/testUtils'
 
 type WellFormed = {
 	pattern: string
@@ -25,21 +26,27 @@ const tests: Record<
 	normalization,
 }
 
-Object.entries(tests).forEach(([k, v]) => {
+for (const [k, v] of Object.entries(tests)) {
 	describe(k, () => {
 		const preset = presets[k as keyof typeof presets] ?? presets.chrome
 
-		const matchPattern = matchPatternWithConfig(preset)
-
 		describe('well-formed', () => {
-			v.wellFormed.forEach(({ pattern, accept, reject }) => {
+			for (const { pattern, accept, reject } of v.wellFormed) {
 				describe(pattern, () => {
-					const matcher = matchPattern(pattern)
+					const matcher = matchPattern(pattern, preset).assertValid()
 
 					it('is valid', () => {
 						expect(matcher.valid).toBe(true)
 
-						expect(matcher.error).toBeUndefined()
+						expect((matcher as any).error).toBeUndefined()
+					})
+
+					it('unwraps successfully', () => {
+						expect(() => matcher.assertValid()).not.toThrow()
+					})
+
+					it('has no error', () => {
+						expect((matcher as any).error).toBeUndefined()
 					})
 
 					it('has at least 1 example', () => {
@@ -48,47 +55,49 @@ Object.entries(tests).forEach(([k, v]) => {
 						)
 					})
 
-					accept.forEach(x => {
+					accept.forEach((x) => {
 						it(`matches ${x}`, () => {
 							expect(matcher.match(x)).toBe(true)
 						})
 					})
 
-					reject.forEach(x => {
+					reject.forEach((x) => {
 						it(`doesn't match ${x}`, () => {
 							expect(matcher.match(x)).toBe(false)
 						})
 					})
 				})
-			})
+			}
 		})
 
 		describe('malformed', () => {
-			const allAccept = v.wellFormed.flatMap(({ accept }) => accept)
-
-			v.malformed.forEach(pattern => {
+			for (const pattern of v.malformed) {
 				describe(pattern, () => {
-					const matcher = matchPattern(pattern)
+					const matcher = matchPattern(pattern, preset)
+
+					assertInvalid(matcher)
 
 					it('is invalid', () => {
 						expect(matcher.valid).toBe(false)
 					})
 
-					it('has error', () => {
-						expect(matcher.error).toBeInstanceOf(Error)
+					it('throws on assertValid', () => {
+						expect(() => matcher.assertValid()).toThrow(TypeError)
 					})
 
-					it('never matches', () => {
-						expect(allAccept.some(str => matcher.match(str))).toBe(
-							false,
-						)
+					it('has error', () => {
+						expect(matcher.error).toBeInstanceOf(TypeError)
+					})
+
+					it('has no `match` method', () => {
+						expect((matcher as any).match).toBeUndefined()
 					})
 
 					it('has no examples', () => {
-						expect(matcher.examples.length).toBe(0)
+						expect((matcher as any).examples).toBeUndefined()
 					})
 				})
-			})
+			}
 		})
 	})
-})
+}

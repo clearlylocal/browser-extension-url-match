@@ -11,10 +11,10 @@ type DummyUrlOptions = Partial<{
 
 const DELIMS = /^|$|[/?=&\-]/
 
-export const getDummyUrl = (
+export function getDummyUrl(
 	patternSegments: PatternSegments,
 	replacements: DummyUrlOptions = {},
-) => {
+) {
 	const { rawHost, rawPathAndQuery } = patternSegments
 	const {
 		defaultScheme = 'https',

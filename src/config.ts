@@ -8,7 +8,13 @@ export const presets: Record<
 	>
 > = {
 	chrome: {
-		supportedSchemes: ['http', 'https', 'file', 'ftp'],
+		supportedSchemes: [
+			'http',
+			'https',
+			'file',
+			'ftp',
+			// 'urn',
+		],
 		schemeStarMatchesWs: false,
 	},
 	firefox: {
@@ -18,9 +24,9 @@ export const presets: Record<
 			'ws',
 			'wss',
 			'ftp',
-			'ftps',
-			'data',
 			'file',
+			// 'ftps',
+			// 'data',
 		],
 		schemeStarMatchesWs: true,
 	},

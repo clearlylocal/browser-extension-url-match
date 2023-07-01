@@ -9,7 +9,6 @@ export const wellFormed = [
 			'ws://sockets.somewhere.org/',
 			'wss://ws.example.com/stuff/',
 			'ftp://files.somewhere.org/',
-			'ftps://files.somewhere.org/',
 		],
 		reject: ['resource://a/b/c/'],
 	},
@@ -145,4 +144,8 @@ export const malformed = [
 	'https://mozilla.org:80/', // Host must not include a port number.
 	'*://*', // Empty path: this should be "*://*/*".
 	'file://*', // Empty path: this should be "file:///*".
+	// FF doesn't support `urn:` scheme
+	'urn:uuid:54723bea-c94e-480e-80c8-a69846c3f582',
+	// FF supports `data:` scheme, but library intentionally rejects due to unclear syntax/semantics in the spec
+	'data:text/html;base64,PGh0bWw+',
 ]

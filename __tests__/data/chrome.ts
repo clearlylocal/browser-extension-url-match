@@ -23,8 +23,23 @@ export const wellFormed = [
 		reject: [],
 	},
 	{
-		pattern: 'http://example.org/foo/bar.html',
-		accept: ['http://example.org/foo/bar.html'],
+		pattern: 'http://localhost/*',
+		accept: [
+			'http://localhost/',
+			'http://localhost:8080/',
+			'http://localhost/xyz',
+			'http://localhost:8080/xyz',
+		],
+		reject: [],
+	},
+	{
+		pattern: 'https://localhost/a/b/c',
+		accept: [
+			'https://localhost/a/b/c',
+			'https://localhost:8080/a/b/c',
+			'https://localhost/a/b/c',
+			'https://localhost:8080/a/b/c',
+		],
 		reject: [],
 	},
 	{
@@ -58,4 +73,8 @@ export const malformed = [
 	'http://foo.*.bar/baz',
 	'http:/bar',
 	'foo://*',
+	// chrome doesn't support `data:` scheme
+	'data:text/html;base64,PGh0bWw+',
+	// chrome supports `urn:` scheme, but library intentionally rejects due to unclear syntax/semantics in the spec
+	'urn:uuid:54723bea-c94e-480e-80c8-a69846c3f582',
 ]

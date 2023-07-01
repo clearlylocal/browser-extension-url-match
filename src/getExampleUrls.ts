@@ -2,10 +2,10 @@ import { getDummyUrl } from './getDummyUrl'
 import { getPatternSegments } from './getPatternSegments'
 import { MatchPatternOptions } from './types'
 
-export const getExampleUrls = (
+export function getExampleUrls(
 	pattern: string,
 	options: Required<MatchPatternOptions>,
-) => {
+) {
 	const patternSegments = getPatternSegments(pattern)!
 	const { supportedSchemes, strict } = options
 
@@ -13,10 +13,10 @@ export const getExampleUrls = (
 	const rootDomains = ['example.com']
 	const pathAndQueryReplacers = ['', 'foo', '/bar/baz/']
 
-	const all = supportedSchemes.flatMap(defaultScheme =>
-		subdomains.flatMap(subdomain =>
-			rootDomains.flatMap(rootDomain =>
-				pathAndQueryReplacers.flatMap(pathAndQueryReplacer =>
+	const all = supportedSchemes.flatMap((defaultScheme) =>
+		subdomains.flatMap((subdomain) =>
+			rootDomains.flatMap((rootDomain) =>
+				pathAndQueryReplacers.flatMap((pathAndQueryReplacer) =>
 					getDummyUrl(patternSegments, {
 						defaultScheme,
 						subdomain,
@@ -29,5 +29,5 @@ export const getExampleUrls = (
 		),
 	)
 
-	return [...new Set(all.filter(Boolean).map(url => url!.href))]
+	return [...new Set(all.filter(Boolean).map((url) => url!.href))]
 }
