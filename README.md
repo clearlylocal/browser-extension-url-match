@@ -2,10 +2,12 @@
 
 Robust, configurable URL pattern matching, conforming to the algorithm used by [Chrome](https://developer.chrome.com/docs/extensions/mv3/match_patterns/) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns) browser extensions.
 
-* ESM import (browser, Deno): `import { matchPattern } from 'https://esm.sh/browser-extension-url-match@1.0.0'`
+* Native ESM import (browser, Deno): `import { matchPattern } from 'https://esm.sh/browser-extension-url-match@1.0.0'`
 * [NPM module](https://www.npmjs.com/package/browser-extension-url-match) (Node): `npm i browser-extension-url-match`
 
 This library uses the native [`URL`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor and [`Array#flatMap`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap). Polyfills may be required if you need to support Internet Explorer or Node.js <= 11.X.
+
+A [live demo](https://clearlylocal.github.io/browser-extension-url-match/) is available.
 
 ## Usage
 
