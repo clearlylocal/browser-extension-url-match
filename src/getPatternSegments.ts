@@ -1,7 +1,8 @@
 import { regex } from 'fancy-regex'
 import { PatternSegments } from './types'
+import { ALL_URLS } from './constants'
 
-const patternRegex = regex`
+const patternRegex = regex()`
 	^
 		(\*|\w+)      # scheme
 		://
@@ -13,8 +14,8 @@ const patternRegex = regex`
 	$
 `
 
-export const getPatternSegments = (pattern: string): PatternSegments | null => {
-	if (pattern === '<all_urls>') {
+export function getPatternSegments(pattern: string): PatternSegments | null {
+	if (pattern === ALL_URLS) {
 		return {
 			pattern,
 			scheme: '*',

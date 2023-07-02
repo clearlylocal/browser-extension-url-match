@@ -2,7 +2,8 @@
 
 Robust, configurable URL pattern matching, conforming to the algorithm used by [Chrome](https://developer.chrome.com/docs/extensions/mv3/match_patterns/) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns) browser extensions.
 
-[`npm i browser-extension-url-match`](https://www.npmjs.com/package/browser-extension-url-match)
+* ESM import (browser, Deno): `import { matchPattern } from 'https://esm.sh/browser-extension-url-match@1.0.0'`
+* [NPM module](https://www.npmjs.com/package/browser-extension-url-match) (Node): `npm i browser-extension-url-match`
 
 This library uses the native [`URL`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor and [`Array#flatMap`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap). Polyfills may be required if you need to support Internet Explorer or Node.js <= 11.X.
 
@@ -10,71 +11,80 @@ This library uses the native [`URL`](https://developer.mozilla.org/en-US/docs/We
 
 ### Basic usage with `matchPattern`
 
-`matchPattern` returns a `Matcher` object that can be used to match against URLs.
+The `matchPattern` function takes a pattern or array of patterns as input and returns a valid or invalid `Matcher` object:
+* If all input patterns are valid, `matcher.valid` will be `true`.
+* If one or more input patterns are invalid, `matcher.valid` will be `false`, and `matcher.error` will contain a diagnostic error object.
 
-```ts
-const matchPattern: (pattern: string) => Matcher
+Calling `matcher.assertValid` asserts that the matcher is valid and throws an error at runtime if it isn’t.
 
-export type Matcher = {
-    valid: boolean
-    error?: Error
-    match: MatchFn
-    examples: string[]
-    pattern: string
-    config: MatchPatternOptions
-}
-```
-
-The default `matchPattern` function uses Chrome presets with strict URL matching.
+By default, matchers use Chrome presets with strict URL matching.
 
 ```ts
 import { matchPattern } from 'browser-extension-url-match'
 
-const matcher = matchPattern('https://example.com/foo/*')
+const matcher = matchPattern('https://example.com/foo/*').assertValid()
 
-matcher.match('https://example.com/foo/bar')
-// ⇒ true
-matcher.match('https://example.com/bar/baz')
-// ⇒ false
-```
+matcher.match('https://example.com/foo/bar') // ⇒ true
+matcher.match('https://example.com/bar/baz') // ⇒ false
 
-If the supplied pattern is invalid:
-* `matcher.valid` will be set to `false`.
-* `matcher.match` will always return `false`, regardless of the URL.
-* `matcher.error` will contain an error with diagnostic information.
+const matcher2 = matchPattern([
+    'https://example.com/foo/*',
+    'https://example.com/bar/*',
+]).assertValid()
 
-```ts
+matcher2.match('https://example.com/foo/bar') // ⇒ true
+matcher2.match('https://example.com/bar/baz') // ⇒ true
+
+const matcher3 = matchPattern('<all_urls>').assertValid()
+
+matcher3.match('https://example.com/foo/bar') // ⇒ true
+
 const invalidMatcher = matchPattern('htp://example.com/*')
 
-invalidMatcher.valid
-// ⇒ false
-invalidMatcher.error
-// ⇒ Error: Scheme "htp" is not supported
-invalidMatcher.match('htp://example.com/')
-// ⇒ false
+invalidMatcher.valid // ⇒ false
+invalidMatcher.error // ⇒ TypeError: Scheme "htp" is not supported
+invalidMatcher.assertValid() // throws TypeError at runtime
+```
 
-const validMatcher = matchPattern('<all_urls>')
+### Working with user input
 
-validMatcher.valid
-// ⇒ true
-validMatcher.error
-// ⇒ undefined
-validMatcher.match('https://example.com/foo/bar')
-// ⇒ true
+If the input patterns are hard coded, calling `assertValid` is a way of telling the TypeScript compiler that they’re assumed to be valid. However, if patterns are supplied from user input or other sources with unknown integrity, it’s usually better to check the `valid` property, which allows TypeScript to correctly infer the type:
+
+```ts
+const matcherInput = form.querySelector<HTMLInputElement>('input#matcher')!
+const checkBtn = form.querySelector<HTMLButtonlement>('button#check')!
+
+checkBtn.addEventListener('click', () => {
+    const matcher = matchPattern(matcherInput.value)
+
+    // type narrowing via ternary operator
+    matcherInput.setCustomValidity(matcher.valid ? '' : matcher.error.message)
+    matcherInput.reportValidity()
+
+    // type narrowing via `if ... else`
+    if (matcher.valid) {
+        const url = prompt('Enter URL to match against')
+        alert(matcher.match(url ?? '') ? 'Matched!' : 'Unmatched')
+    } else {
+        console.error(matcher.error.message)
+    }
+})
 ```
 
 ### Configuration options
 
-You can create a customized version of `matchPattern` using `matchPatternWithConfig`.
+You can customize `matchPattern` by supplying options in the second argument.
 
 ```ts
-import { matchPatternWithConfig } from 'browser-extension-url-match'
+import { matchPattern } from 'browser-extension-url-match'
 
-const matchPattern = matchPatternWithConfig({
+const options = {
     supportedSchemes: ['http', 'https', 'ftp', 'ftps'],
-})
+}
 
-matchPattern('ftps://*/*').match('ftps://example.com/foo/bar')
+matchPattern('ftps://*/*', options)
+    .assertValid()
+    .match('ftps://example.com/foo/bar')
 // ⇒ true
 ```
 
@@ -90,7 +100,7 @@ If set to `false`, the specified path segment is ignored and is always treated a
 
 An array of schemes to allow in the pattern. Available schemes are `http`, `https`, `ws`, `wss`, `ftp`, `ftps`, and `file`.
 
-`data` is not supported, due to very limited implementation and unclear semantics.
+`data` and `urn` are not currently supported, due to limited implementation and unclear semantics.
 
 **Default:** `['http', 'https', 'file', 'ftp']`
 
@@ -105,34 +115,33 @@ If `true`, `*` in the scheme will match `ws` and `wss` as well as `http` and `ht
 Presets are available to provide defaults based on what Chrome and Firefox support.
 
 ```ts
-import { matchPatternWithConfig, presets } from 'browser-extension-url-match'
+import { matchPattern, presets } from 'browser-extension-url-match'
 
-const matchPattern = matchPatternWithConfig(presets.firefox)
+const matcher = matchPattern('*://example.com/', presets.firefox)
 
-const matcher = matchPattern('*://example.com/')
-
-matcher.match('ws://example.com')
-// ⇒ true
+matcher.assertValid().match('ws://example.com') // ⇒ true
 ```
 
 You can also combine presets with custom options:
 
 ```ts
-const matchPattern = matchPatternWithConfig({
+const options = {
     ...presets.firefox,
     strict: false,
-})
+}
 
-matchPattern('wss://example.com/').match('wss://example.com/foo/bar')
+matchPattern('wss://example.com/', options)
+    .assertValid()
+    .match('wss://example.com/foo/bar')
 // ⇒ true
 ```
 
 ### Generating examples
 
-You can generate an array of example matching URL strings from any `Matcher` object. The array will be empty if the matcher is invalid.
+You can also generate an array of examples matching URL strings from a valid `Matcher` object.
 
 ```ts
-matchPattern('https://*.example.com/*').examples
+matchPattern('https://*.example.com/*').assertValid().examples
 // ⇒ [
 //     'https://example.com/',
 //     'https://example.com/foo',
@@ -144,7 +153,4 @@ matchPattern('https://*.example.com/*').examples
 //     'https://foo.bar.example.com/foo',
 //     'https://foo.bar.example.com/bar/baz/',
 // ]
-
-matchPattern('INVALID').examples
-// ⇒ []
 ```

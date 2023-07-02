@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>browser-extension-url-match demo</title>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/chota@0.9.2/dist/chota.min.css"
+		/>
+		<style>
+			main.container {
+				margin-block-start: 6rem;
+			}
+			form.form {
+				display: grid;
+				gap: 2rem;
+				margin-block-end: 3rem;
+			}
+			#results {
+				white-space: pre-wrap;
+			}
+			h2 {
+				margin-block-end: 0.5rem;
+			}
+		</style>
+	</head>
+	<body>
+		<main class="container">
+			<h1><code>browser-extension-url-match</code> demo</h1>
+
+			<p>
+				<code>matchPattern</code> and <code>presets</code> are also
+				available in the browser console.
+			</p>
+
+			<form class="form">
+				<div>
+					<label for="matcher">
+						Patterns (one per line)
+						<textarea type="text" id="matcher" rows="5"></textarea>
+					</label>
+				</div>
+				<div>
+					<label for="url">
+						URLs to test (one per line)
+						<textarea type="url" id="url" rows="5"></textarea>
+					</label>
+				</div>
+				<div>
+					<button type="reset" id="reset">Reset</button>
+				</div>
+			</form>
+
+			<h2>Results</h2>
+			<div id="results"></div>
+		</main>
+
+		<script type="module">
+			const LIB_IMPORT_URL = 'https://esm.sh/browser-extension-url-match'
+
+			const ns = (str) => `browser-extension-url-match::${str}`
+			const PATTERNS = ns('patterns')
+			const URLS = ns('urls')
+
+			const matcherInput = document.querySelector('#matcher')
+			const urlInput = document.querySelector('#url')
+			const resultsDisplay = document.querySelector('#results')
+			const resetBtn = document.querySelector('#reset')
+
+			const lines = (str) =>
+				str
+					.split('\n')
+					.map((x) => x.trim())
+					.filter(Boolean)
+			const unlines = (strs) => strs.join('\n')
+
+			function init() {
+				matcherInput.textContent =
+					localStorage.getItem(PATTERNS) ??
+					unlines([
+						'https://*.example.com/foo',
+						'https://*.example.com/foo/*',
+					])
+
+				urlInput.textContent =
+					localStorage.getItem(URLS) ??
+					unlines([
+						'https://example.com/foo',
+						'https://subdomain.example.com/foo',
+						'https://www.example.com/foo/bar',
+						'https://www.example.com/bar',
+					])
+			}
+
+			init()
+
+			const browserExtensionUrlMatch = await import(LIB_IMPORT_URL)
+
+			const { matchPattern, presets } = browserExtensionUrlMatch
+
+			window.browserExtensionUrlMatch = browserExtensionUrlMatch
+			window.matchPattern = matchPattern
+			window.presets = presets
+
+			function updateResults() {
+				const patterns = lines(matcherInput.value)
+
+				const matcher = matchPattern(patterns.length ? patterns : [''])
+				const urls = lines(urlInput.value)
+
+				const results = matcher.valid
+					? urls
+							.map((url) => {
+								const matches = matcher.match(url)
+
+								return matches ? `✅ ${url}` : `❌ ${url}`
+							})
+							.join('\n')
+					: `⚠️ Invalid pattern: ${matcher.error.message}`
+
+				localStorage.setItem(PATTERNS, matcherInput.value)
+				localStorage.setItem(URLS, urlInput.value)
+
+				resultsDisplay.textContent = results
+			}
+
+			function reset() {
+				localStorage.removeItem(PATTERNS)
+				localStorage.removeItem(URLS)
+
+				init()
+				setTimeout(updateResults, 0)
+			}
+
+			matcherInput.addEventListener('input', updateResults)
+			urlInput.addEventListener('input', updateResults)
+			resetBtn.addEventListener('click', reset)
+
+			updateResults()
+		</script>
+	</body>
+</html>

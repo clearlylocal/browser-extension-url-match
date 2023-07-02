@@ -1,20 +1,33 @@
 export type MatchFn = (url: string | URL) => boolean
 
-export type Matcher = {
-	examples: string[]
-	match: MatchFn
-	pattern: string
-	config: MatchPatternOptions
-} & (
-	| {
-			valid: true
-			error?: undefined
-	  }
-	| {
-			valid: false
-			error: Error
-	  }
-)
+type Assertable = {
+	/**
+	 * Return the valid matcher or throw if invalid
+	 *
+	 * @throws {TypeError}
+	 */
+	assertValid: () => Matcher
+}
+
+export type Matcher = Readonly<
+	Assertable & {
+		valid: true
+		match: MatchFn
+		patterns: string[]
+		examples: string[]
+		config: MatchPatternOptions
+		error?: undefined
+	}
+>
+
+export type InvalidMatcher = Readonly<
+	Assertable & {
+		valid: false
+		error: Error
+	}
+>
+
+export type MatcherOrInvalid = Matcher | InvalidMatcher
 
 export type MatchPatternOptions = {
 	supportedSchemes?: (
@@ -24,9 +37,10 @@ export type MatchPatternOptions = {
 		| 'wss'
 		| 'ftp'
 		| 'ftps'
-		| 'data'
 		| 'file'
 	)[]
+	// | 'data'
+	// | 'urn'
 	schemeStarMatchesWs?: boolean
 	strict?: boolean
 }
