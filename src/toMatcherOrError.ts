@@ -36,9 +36,15 @@ export function toMatchFnOrError(
 		try {
 			const url = new URL(pattern)
 
-			if (url.origin === pattern) {
+			if (!pattern.slice(url.origin.length).startsWith('/')) {
 				return new TypeError(
-					`Pattern "${pattern}" lacks a trailing slash. Use "${pattern}/*" to match any paths with that origin, or "${pattern}/" to match that URL alone`,
+					`Pattern "${pattern}" does not contain a path. Use "${pattern}/*" to match any paths with that origin or "${pattern}/" to match that URL alone`,
+				)
+			}
+
+			if (url.hash || url.href.endsWith('#')) {
+				return new TypeError(
+					`Pattern cannot contain a hash: "${pattern}" contains hash "${url.hash || '#'}"`,
 				)
 			}
 		} catch {
@@ -64,7 +70,7 @@ export function toMatchFnOrError(
 					['https?', schemeStarMatchesWs && 'wss?']
 						.filter(Boolean)
 						.join('|'),
-			  )
+				)
 			: scheme
 	}:`
 

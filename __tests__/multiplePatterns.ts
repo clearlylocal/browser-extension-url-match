@@ -37,7 +37,7 @@ describe('matchAny', () => {
 
 		expect(() => matcher.assertValid()).toThrow(TypeError)
 		expect(() => matcher.assertValid()).toThrow(
-			'Pattern "https://invalid-pattern.com" lacks a trailing slash',
+			'Pattern "https://invalid-pattern.com" does not contain a path',
 		)
 
 		expect(matcher.valid).toBe(false)

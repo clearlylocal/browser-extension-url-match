@@ -31,7 +31,7 @@ function _matchPattern(options: MatchPatternOptions) {
 					valid: false,
 					error: val,
 					assertValid,
-			  }
+				}
 			: {
 					valid: true,
 					match: val,
@@ -47,7 +47,7 @@ function _matchPattern(options: MatchPatternOptions) {
 					patterns: [pattern],
 					config: combinedOptions,
 					assertValid,
-			  }
+				}
 	}
 }
 

@@ -3,7 +3,7 @@ import { matchPattern, presets } from '../src'
 describe('error messages', () => {
 	it('invalid pattern (bare URL origin with no trailing slash)', () => {
 		expect(matchPattern('https://example.com').error?.message).toMatch(
-			'Pattern "https://example.com" lacks a trailing slash',
+			'Pattern "https://example.com" does not contain a path',
 		)
 	})
 
@@ -17,7 +17,7 @@ describe('error messages', () => {
 		expect(
 			matchPattern(['https://example.com/foo/*', 'https://example.com'])
 				.error?.message,
-		).toMatch('Pattern "https://example.com" lacks a trailing slash')
+		).toMatch('Pattern "https://example.com" does not contain a path')
 	})
 
 	it('unsupported scheme', () => {
@@ -76,5 +76,28 @@ describe('error messages', () => {
 		)
 
 		expect(matchPattern('file:///a').error).toBeUndefined()
+	})
+
+	it('contains hash', () => {
+		expect(matchPattern('https://example.com#').error?.message).toMatch(
+			'does not contain a path',
+		)
+		expect(matchPattern('https://example.com#bar').error?.message).toMatch(
+			'does not contain a path',
+		)
+
+		expect(matchPattern('https://example.com/#').error?.message).toMatch(
+			'cannot contain a hash',
+		)
+		expect(matchPattern('https://example.com/#').error?.message).toMatch(
+			'"#"',
+		)
+
+		expect(matchPattern('https://example.com/#foo').error?.message).toMatch(
+			'cannot contain a hash',
+		)
+		expect(matchPattern('https://example.com/#foo').error?.message).toMatch(
+			'"#foo"',
+		)
 	})
 })

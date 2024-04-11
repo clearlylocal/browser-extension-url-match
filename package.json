@@ -1,6 +1,6 @@
 {
 	"name": "browser-extension-url-match",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Browser extension URL pattern matching",
 	"main": "dist/index.js",
 	"scripts": {

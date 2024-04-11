@@ -30,4 +30,10 @@ export const malformed = [
 	'https://*.*.www.ab.com/',
 	'https://www.*.ab.com/',
 	'https://*www.ab.com/',
+
+	// https://github.com/clearlylocal/browser-extension-url-match/issues/3
+	'https://example.com#',
+	'https://example.com/#',
+	'https://example.com/#foo',
+	'https://example.com#bar',
 ]
