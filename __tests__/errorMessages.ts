@@ -80,10 +80,17 @@ describe('error messages', () => {
 
 	it('contains hash', () => {
 		expect(matchPattern('https://example.com#').error?.message).toMatch(
-			'does not contain a path',
+			'cannot contain a hash',
+		)
+		expect(matchPattern('https://example.com#').error?.message).toMatch(
+			'"#"',
+		)
+
+		expect(matchPattern('https://example.com#bar').error?.message).toMatch(
+			'cannot contain a hash',
 		)
 		expect(matchPattern('https://example.com#bar').error?.message).toMatch(
-			'does not contain a path',
+			'"#bar"',
 		)
 
 		expect(matchPattern('https://example.com/#').error?.message).toMatch(
@@ -99,5 +106,19 @@ describe('error messages', () => {
 		expect(matchPattern('https://example.com/#foo').error?.message).toMatch(
 			'"#foo"',
 		)
+
+		expect(matchPattern('https://example.com#/foo').error?.message).toMatch(
+			'cannot contain a hash',
+		)
+		expect(matchPattern('https://example.com#/foo').error?.message).toMatch(
+			'"#/foo"',
+		)
+
+		expect(
+			matchPattern('https://example.com/#/bar').error?.message,
+		).toMatch('cannot contain a hash')
+		expect(
+			matchPattern('https://example.com/#/bar').error?.message,
+		).toMatch('"#/bar"')
 	})
 })

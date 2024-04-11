@@ -36,15 +36,15 @@ export function toMatchFnOrError(
 		try {
 			const url = new URL(pattern)
 
-			if (!pattern.slice(url.origin.length).startsWith('/')) {
-				return new TypeError(
-					`Pattern "${pattern}" does not contain a path. Use "${pattern}/*" to match any paths with that origin or "${pattern}/" to match that URL alone`,
-				)
-			}
-
 			if (url.hash || url.href.endsWith('#')) {
 				return new TypeError(
 					`Pattern cannot contain a hash: "${pattern}" contains hash "${url.hash || '#'}"`,
+				)
+			}
+
+			if (!pattern.slice(url.origin.length).startsWith('/')) {
+				return new TypeError(
+					`Pattern "${pattern}" does not contain a path. Use "${pattern}/*" to match any paths with that origin or "${pattern}/" to match that URL alone`,
 				)
 			}
 		} catch {

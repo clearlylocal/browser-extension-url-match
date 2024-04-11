@@ -36,4 +36,7 @@ export const malformed = [
 	'https://example.com/#',
 	'https://example.com/#foo',
 	'https://example.com#bar',
+
+	'https://example.com#/foo',
+	'https://example.com/#/bar',
 ]
